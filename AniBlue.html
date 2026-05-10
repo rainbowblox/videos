@@ -1,0 +1,85 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AniBlue — strona przykładowa</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo">
+        <a href="#" class="logo-link"><span class="logo-mark">Ani</span><span class="logo-name">Blue</span></a>
+      </div>
+
+      <div class="search">
+        <input id="searchInput" type="search" placeholder="Szukaj anime, tytułów..." />
+        <button id="searchBtn" class="btn btn-ghost">Szukaj</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-inner container">
+        <div class="hero-media">
+          <img id="heroImage" src="/meta-data/images/obrazek.jpg" alt="Okładka" />
+        </div>
+
+        <div class="hero-content">
+          <h1 id="title">Tytuł ładowany z JSON...</h1>
+          <p id="description" class="desc">Opis ładowany z JSON...</p>
+
+          <div class="meta-row">
+            <span class="meta-item"><strong>Rating:</strong> <span id="rating">—</span></span>
+            <span class="meta-item"><strong>Premiera:</strong> <span id="release">—</span></span>
+            <span class="meta-item"><strong>Jakość:</strong> <span id="quality">—</span></span>
+          </div>
+
+          <div class="actions">
+            <button id="watchBtn" class="btn btn-primary">WATCH NOW</button>
+            <button id="trailerBtn" class="btn btn-outline">Zwiastun</button>
+          </div>
+
+          <div class="social">
+            <div class="social-item">
+              <button class="social-btn">❤ <span id="likes">12.3k</span></button>
+            </div>
+            <div class="social-item">
+              <button class="social-btn">👁 <span id="views">98.7k</span></button>
+            </div>
+            <div class="social-item">
+              <button class="social-btn">💬 <span id="comments">1.2k</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="list container">
+      <h2>Podobne tytuły</h2>
+      <div id="cards" class="cards-grid">
+        <!-- przykładowe karty; można wypełnić dynamicznie -->
+        <article class="card">
+          <img src="/meta-data/images/obrazek.jpg" alt="mini" />
+          <h3>Przykład 1</h3>
+        </article>
+        <article class="card">
+          <img src="/meta-data/images/obrazek.jpg" alt="mini" />
+          <h3>Przykład 2</h3>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>© <strong>AniBlue</strong> — wszystkie prawa zastrzeżone</small>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

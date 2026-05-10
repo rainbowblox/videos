@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       qualityEl.textContent = data.quality || '—';
     })
     .catch(err => {
-      console.warn('Błąd ładowania metadanych:', err);
+      alert('Błąd ładowania metadanych:', err);
       titleEl.textContent = 'Tytuł niedostępny';
       descEl.textContent = 'Nie udało się załadować opisu.';
     });

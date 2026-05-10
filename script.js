@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const heroImg = document.getElementById('heroImage');
 
   // Ścieżki podane przez użytkownika
-  const jsonPath = '/meta-data/titles/data.json';
-  const imagePath = '/meta-data/images/obrazek.jpg';
+  const jsonPath = '../meta-data/titles/data.json';
+  const imagePath = '../meta-data/images/obrazek.jpg';
 
   // Ustaw obraz (fallback)
   heroImg.src = imagePath;

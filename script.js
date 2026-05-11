@@ -187,3 +187,57 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = `/search?q=${encodeURIComponent(q)}`;
   });
 });
+
+// zakładamy, że buildCarousel(list) już tworzy karty w #carousel
+let currentIndex = 0;
+
+function updateCarouselView() {
+  const cards = carouselEl.children;
+  const total = cards.length;
+  if (total === 0) {
+    carouselIndexEl.textContent = '0';
+    carouselTotalEl.textContent = '0';
+    return;
+  }
+  // oblicz szerokość karty (uwzględnia gap)
+  const cardRect = cards[0].getBoundingClientRect();
+  const gap = 12; // dopasuj jeśli inny
+  const cardWidth = Math.round(cardRect.width + gap);
+  // przewiń karuzelę tak, by currentIndex był widoczny
+  carouselEl.scrollTo({ left: currentIndex * cardWidth, behavior: 'smooth' });
+  carouselIndexEl.textContent = String(currentIndex + 1);
+  carouselTotalEl.textContent = String(total);
+}
+
+// przyciski overlay (po prawej na obrazie)
+document.getElementById('prevBtn')?.addEventListener('click', () => {
+  const total = carouselEl.children.length;
+  if (total === 0) return;
+  currentIndex = (currentIndex - 1 + total) % total;
+  updateCarouselView();
+});
+document.getElementById('nextBtn')?.addEventListener('click', () => {
+  const total = carouselEl.children.length;
+  if (total === 0) return;
+  currentIndex = (currentIndex + 1) % total;
+  updateCarouselView();
+});
+
+// gdy budujesz karuzelę, ustaw currentIndex = 0 i zaktualizuj widok
+function buildCarousel(list) {
+  carouselEl.innerHTML = '';
+  list.forEach((item, idx) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    const imgSrc = item.image ? (item.image.startsWith('/') ? item.image : ('../' + item.image.replace(/^\.?\//, ''))) : defaultImage;
+    card.innerHTML = `<img src="${imgSrc}" alt="${escapeHtml(item.title)}" />
+                      <h3>${escapeHtml(item.title)}</h3>
+                      <div class="small">${escapeHtml(item.type || '—')} • ${item.episodes != null ? item.episodes + ' ep.' : '—'}</div>`;
+    card.addEventListener('click', () => {
+      setMainFromItem(item);
+    });
+    carouselEl.appendChild(card);
+  });
+  currentIndex = 0;
+  updateCarouselView();
+}

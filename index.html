@@ -1,11 +1,10 @@
-<!-- index.html -->
 <!doctype html>
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AniBlue — strona przykładowa</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>AniBlue — Tytuł</title>
+  <link rel="stylesheet" href="../styles.css" />
 </head>
 <body>
   <header class="site-header">
@@ -25,32 +24,22 @@
     <section class="hero">
       <div class="hero-inner container">
         <div class="hero-media">
-          <img id="heroImage" src="/meta-data/images/obrazek.jpg" alt="Okładka" />
+          <img id="heroImage" src="../meta-data/images/obrazek.jpg" alt="Okładka" />
         </div>
 
         <div class="hero-content">
           <h1 id="title">Tytuł ładowany z JSON...</h1>
+
+          <div class="meta-top">
+            <span id="episodesInfo" class="episodes">Odcinki: —</span>
+            <span id="typeInfo" class="ep-type">Typ: —</span>
+            <span id="genresInfo" class="genres">Gatunki: —</span>
+          </div>
+
           <p id="description" class="desc">Opis ładowany z JSON...</p>
 
-          <!-- część hero-content: po <h1 id="title">... -->
-<div class="meta-top">
-  <span id="episodesInfo" class="episodes">Odcinki: —</span>
-  <span id="typeInfo" class="ep-type">Typ: —</span>
-  <span id="genresInfo" class="genres">Gatunki: —</span>
-</div>
-
-<p id="description" class="desc">Opis ładowany z JSON...</p>
-
-<!-- social: ukryte domyślnie, pokaż po kliknięciu -->
-<div class="social-controls">
-  <button id="toggleSocial" class="btn btn-ghost">Pokaż statystyki</button>
-  <div id="socialWrap" class="social hidden">
-    <div class="social-item"><button class="social-btn">❤ <span id="likes">12.3k</span></button></div>
-    <div class="social-item"><button class="social-btn">👁 <span id="views">98.7k</span></button></div>
-    <div class="social-item"><button class="social-btn">💬 <span id="comments">1.2k</span></button></div>
-  </div>
-</div>
-<span class="meta-item"><strong>Rating:</strong> <span id="rating">—</span></span>
+          <div class="meta-row">
+            <span class="meta-item"><strong>Rating:</strong> <span id="rating">—</span></span>
             <span class="meta-item"><strong>Premiera:</strong> <span id="release">—</span></span>
             <span class="meta-item"><strong>Jakość:</strong> <span id="quality">—</span></span>
           </div>
@@ -60,34 +49,26 @@
             <button id="trailerBtn" class="btn btn-outline">Zwiastun</button>
           </div>
 
-<!-- sekcja karuzeli po prawej stronie (obok listy podobnych tytułów) -->
-<section class="list container">
-  <h2>Podobne tytuły</h2>
-
-  <div class="carousel-wrap">
-    <button id="prevBtn" class="carousel-arrow">&lt;</button>
-    <div id="carousel" class="cards-grid carousel">
-      <!-- karty będą wstawiane dynamicznie -->
-    </div>
-    <button id="nextBtn" class="carousel-arrow">&gt;</button>
-    <div class="carousel-counter"><span id="carouselIndex">0</span>/<span id="carouselTotal">0</span></div>
-  </div>
-</section>
-            
-          
+          <div class="social-controls">
+            <button id="toggleSocial" class="btn btn-ghost">Pokaż statystyki</button>
+            <div id="socialWrap" class="social hidden">
+              <div class="social-item"><button class="social-btn">❤ <span id="likes">12.3k</span></button></div>
+              <div class="social-item"><button class="social-btn">👁 <span id="views">98.7k</span></button></div>
+              <div class="social-item"><button class="social-btn">💬 <span id="comments">1.2k</span></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section class="list container">
       <h2>Podobne tytuły</h2>
-      <div id="cards" class="cards-grid">
-        <!-- przykładowe karty; można wypełnić dynamicznie -->
-        <article class="card">
-          <img src="/meta-data/images/obrazek.jpg" alt="mini" />
-          <h3>Przykład 1</h3>
-        </article>
-        <article class="card">
-          <img src="/meta-data/images/obrazek.jpg" alt="mini" />
-          <h3>Przykład 2</h3>
-        </article>
+
+      <div class="carousel-wrap">
+        <button id="prevBtn" class="carousel-arrow">&lt;</button>
+        <div id="carousel" class="cards-grid carousel" aria-live="polite"></div>
+        <button id="nextBtn" class="carousel-arrow">&gt;</button>
+        <div class="carousel-counter"><span id="carouselIndex">0</span>/<span id="carouselTotal">0</span></div>
       </div>
     </section>
   </main>

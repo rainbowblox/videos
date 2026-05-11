@@ -91,3 +91,52 @@ body{
   .carousel{grid-auto-columns:140px}
   .carousel-counter{right:16px}
 }
+
+/* HERO overlay: strzałki po prawej, pionowo wyśrodkowane */
+.hero-media{position:relative}
+.hero-overlay{
+  position:absolute;
+  right:18px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  z-index:30;
+  pointer-events:none; /* domyślnie nie blokuje klików poza przyciskami */
+}
+.overlay-arrow{
+  pointer-events:auto;
+  background:rgba(2,6,23,0.7);
+  color:var(--accent-contrast);
+  border:1px solid rgba(255,255,255,0.06);
+  width:44px;
+  height:44px;
+  border-radius:8px;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(2,6,23,0.6);
+}
+.overlay-arrow:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(2,6,23,0.7)}
+.overlay-counter{
+  pointer-events:auto;
+  background:rgba(255,255,255,0.03);
+  color:var(--muted);
+  padding:6px 10px;
+  border-radius:8px;
+  font-weight:600;
+  font-size:0.95rem;
+  text-align:center;
+  min-width:64px;
+}
+
+/* Dostosowanie dla małych ekranów: przenieś overlay niżej i zmniejsz przyciski */
+@media (max-width:880px){
+  .hero-overlay{right:12px; gap:8px}
+  .overlay-arrow{width:38px;height:38px;font-size:18px}
+  .overlay-counter{min-width:56px;font-size:0.9rem}
+}

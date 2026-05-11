@@ -21,45 +21,34 @@
   </header>
 
   <main>
-    <section class="hero">
-      <div class="hero-inner container">
-        <div class="hero-media">
-          <img id="heroImage" src="../meta-data/images/obrazek.jpg" alt="Okładka" />
-        </div>
-
-        <div class="hero-content">
-          <h1 id="title">Tytuł ładowany z JSON...</h1>
-
-          <div class="meta-top">
-            <span id="episodesInfo" class="episodes">Odcinki: —</span>
-            <span id="typeInfo" class="ep-type">Typ: —</span>
-            <span id="genresInfo" class="genres">Gatunki: —</span>
-          </div>
-
-          <p id="description" class="desc">Opis ładowany z JSON...</p>
-
-          <div class="meta-row">
-            <span class="meta-item"><strong>Rating:</strong> <span id="rating">—</span></span>
-            <span class="meta-item"><strong>Premiera:</strong> <span id="release">—</span></span>
-            <span class="meta-item"><strong>Jakość:</strong> <span id="quality">—</span></span>
-          </div>
-
-          <div class="actions">
-            <button id="watchBtn" class="btn btn-primary">WATCH NOW</button>
-            <button id="trailerBtn" class="btn btn-outline">Zwiastun</button>
-          </div>
-
-          <div class="social-controls">
-            <button id="toggleSocial" class="btn btn-ghost">Pokaż statystyki</button>
-            <div id="socialWrap" class="social hidden">
-              <div class="social-item"><button class="social-btn">❤ <span id="likes">12.3k</span></button></div>
-              <div class="social-item"><button class="social-btn">👁 <span id="views">98.7k</span></button></div>
-              <div class="social-item"><button class="social-btn">💬 <span id="comments">1.2k</span></button></div>
-            </div>
-          </div>
-        </div>
+    <!-- HERO (zamień istniejący .hero-inner) -->
+<section class="hero">
+  <div class="hero-inner container">
+    <div class="hero-media">
+      <img id="heroImage" src="../meta-data/images/obrazek.jpg" alt="Okładka" />
+      <!-- overlay z przyciskami strzałek i licznikiem -->
+      <div class="hero-overlay">
+        <button id="prevBtn" class="overlay-arrow" aria-label="Poprzedni">&lt;</button>
+        <div class="overlay-counter"><span id="carouselIndex">0</span>/<span id="carouselTotal">0</span></div>
+        <button id="nextBtn" class="overlay-arrow" aria-label="Następny">&gt;</button>
       </div>
-    </section>
+    </div>
+
+    <div class="hero-content">
+      <h1 id="title">Tytuł ładowany z JSON...</h1>
+
+      <div class="meta-top">
+        <span id="episodesInfo" class="episodes">Odcinki: —</span>
+        <span id="typeInfo" class="ep-type">Typ: —</span>
+        <span id="genresInfo" class="genres">Gatunki: —</span>
+      </div>
+
+      <p id="description" class="desc">Opis ładowany z JSON...</p>
+
+      <!-- reszta hero-content bez zmian -->
+    </div>
+  </div>
+</section>
 
     <section class="list container">
       <h2>Podobne tytuły</h2>

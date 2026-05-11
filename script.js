@@ -1,11 +1,5 @@
+// videos/script.js - produkcyjna, odporna wersja
 document.addEventListener('DOMContentLoaded', () => {
-  const DEBUG = true;
-
-  const say = (msg) => {
-    console.log(msg);
-    if (DEBUG) alert(String(msg));
-  };
-
   const titleEl = document.getElementById('title');
   const descEl = document.getElementById('description');
   const ratingEl = document.getElementById('rating');
@@ -21,381 +15,167 @@ document.addEventListener('DOMContentLoaded', () => {
   const socialWrap = document.getElementById('socialWrap');
 
   const carouselEl = document.getElementById('carousel');
-
-  const prevBtns = document.querySelectorAll('#prevBtn');
-  const nextBtns = document.querySelectorAll('#nextBtn');
-  const carouselIndexEls = document.querySelectorAll('#carouselIndex');
-  const carouselTotalEls = document.querySelectorAll('#carouselTotal');
-
-  const watchBtn = document.getElementById('watchBtn');
-  const trailerBtn = document.getElementById('trailerBtn');
-  const searchBtn = document.getElementById('searchBtn');
-  const searchInput = document.getElementById('searchInput');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const carouselIndexEl = document.getElementById('carouselIndex');
+  const carouselTotalEl = document.getElementById('carouselTotal');
 
   const jsonCandidates = [
-    '../meta-data/images/data.json',
-    '/meta-data/images/data.json',
+    '../meta-data/titles/data.json',
     '../meta-data/data.json',
     '/meta-data/data.json'
   ];
+  const defaultImage = '../meta-data/images/obrazek.jpg';
 
-  const defaultImageCandidates = [
-    '../meta-data/titles/image.jpg',
-    '/meta-data/titles/image.jpg',
-    '../meta-data/images/obrazek.jpg',
-    '/meta-data/images/obrazek.jpg'
-  ];
-
+  // prosty fallback sample
   const sampleList = [
-    {
-      title: 'Tytuł A',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 12,
-      type: 'TV',
-      tags: ['fantasy', 'przygodowe'],
-      description: 'Opis Tytuł A',
-      social: { likes: '12.3k', views: '98.7k', comments: '1.2k' }
-    },
-    {
-      title: 'Tytuł B',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 24,
-      type: 'TV',
-      tags: ['akcja'],
-      description: 'Opis Tytuł B'
-    },
-    {
-      title: 'Tytuł C',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: null,
-      type: 'ONA',
-      tags: ['dramat'],
-      description: 'Opis Tytuł C'
-    },
-    {
-      title: 'Tytuł D',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 1,
-      type: 'MOVIE',
-      tags: ['fantasy'],
-      description: 'Opis Tytuł D'
-    },
-    {
-      title: 'Tytuł E',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 6,
-      type: 'OVA',
-      tags: ['komedia'],
-      description: 'Opis Tytuł E'
-    },
-    {
-      title: 'Tytuł F',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 13,
-      type: 'TV',
-      tags: ['romans'],
-      description: 'Opis Tytuł F'
-    },
-    {
-      title: 'Tytuł G',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: null,
-      type: 'TV',
-      tags: ['mystery'],
-      description: 'Opis Tytuł G'
-    },
-    {
-      title: 'Tytuł H',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 10,
-      type: 'TV',
-      tags: ['slice of life'],
-      description: 'Opis Tytuł H'
-    },
-    {
-      title: 'Tytuł I',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 3,
-      type: 'OVA',
-      tags: ['fantasy'],
-      description: 'Opis Tytuł I'
-    },
-    {
-      title: 'Tytuł J',
-      release: '2026',
-      image: '../meta-data/titles/image.jpg',
-      episodes: 0,
-      type: 'TV',
-      tags: ['akcja'],
-      description: 'Opis Tytuł J'
-    }
+    {"title":"Tytuł A","release":"2026","image":"../meta-data/images/obrazek.jpg","episodes":12,"type":"TV","tags":["fantasy","przygodowe"],"description":"Opis Tytuł A","social":{"likes":"12.3k","views":"98.7k","comments":"1.2k"}},
+    {"title":"Tytuł B","release":"2026","image":"../meta-data/images/obrazek.jpg","episodes":24,"type":"TV","tags":["akcja"],"description":"Opis Tytuł B"}
+    // ... do 10 elementów
   ];
 
-  let currentIndex = 0;
-  const defaultImage = pickFirstWorkingImage(defaultImageCandidates) || '';
-
-  function pickFirstWorkingImage(candidates) {
-    return candidates[0] || '';
-  }
-
-  function escapeHtml(s) {
-    if (s === null || s === undefined) return '';
-    return String(s).replace(/[&<>"']/g, (m) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;'
-    }[m]));
-  }
-
-  function resolveImagePath(raw) {
-    if (!raw || typeof raw !== 'string') return defaultImage;
-
-    if (
-      raw.startsWith('data:') ||
-      raw.startsWith('http://') ||
-      raw.startsWith('https://') ||
-      raw.startsWith('//')
-    ) {
-      return raw;
-    }
-
-    if (raw.startsWith('/')) return raw;
-    if (raw.startsWith('../') || raw.startsWith('./')) return raw;
-
-    return '../meta-data/titles/' + raw.replace(/^\/+/, '');
-  }
-
-  function setText(el, value) {
-    if (!el) return;
-    el.textContent = value;
-  }
-
-  function setMainFromItem(item) {
-    if (!item) return;
-
-    setText(titleEl, item.title || 'Brak tytułu');
-    setText(descEl, item.description || 'Brak opisu');
-    setText(ratingEl, item.rating ?? (ratingEl ? ratingEl.textContent : '—'));
-    setText(releaseEl, item.release || '—');
-    setText(qualityEl, item.quality || (qualityEl ? qualityEl.textContent : '—'));
-
-    setText(episodesInfo, 'Odcinki: ' + (item.episodes != null ? item.episodes : '—'));
-    setText(typeInfo, 'Typ: ' + (item.type || item.version || '—'));
-    setText(
-      genresInfo,
-      'Gatunki: ' + (
-        Array.isArray(item.tags)
-          ? item.tags.join(', ')
-          : (item.genres || '—')
-      )
+  heroImg.onerror = () => {
+    heroImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340"><rect width="100%" height="100%" fill="#0b1220"/><text x="50%" y="50%" fill="#9aa6b2" font-size="20" text-anchor="middle" dominant-baseline="middle">Brak obrazu</text></svg>'
     );
+  };
+  heroImg.src = defaultImage;
 
-    if (heroImg && item.image) {
-      heroImg.src = resolveImagePath(item.image);
-    }
-
-    if (item.social) {
-      const likes = document.getElementById('likes');
-      const views = document.getElementById('views');
-      const comments = document.getElementById('comments');
-
-      if (likes && item.social.likes) likes.textContent = item.social.likes;
-      if (views && item.social.views) views.textContent = item.social.views;
-      if (comments && item.social.comments) comments.textContent = item.social.comments;
-    }
-  }
-
-  function updateCarouselView() {
-    if (!carouselEl) return;
-
-    const cards = carouselEl.children;
-    const total = cards.length;
-
-    if (total === 0) {
-      carouselIndexEls.forEach(el => el.textContent = '0');
-      carouselTotalEls.forEach(el => el.textContent = '0');
-      return;
-    }
-
-    const firstCard = cards[0];
-    const cardWidth = firstCard.getBoundingClientRect().width + 12;
-
-    carouselEl.scrollTo({
-      left: currentIndex * cardWidth,
-      behavior: 'smooth'
-    });
-
-    carouselIndexEls.forEach(el => el.textContent = String(currentIndex + 1));
-    carouselTotalEls.forEach(el => el.textContent = String(total));
-  }
-
-  function buildCarousel(list) {
-    if (!carouselEl) {
-      say('Brak elementu #carousel w HTML');
-      return;
-    }
-
-    carouselEl.innerHTML = '';
-
-    list.forEach((item) => {
-      const card = document.createElement('article');
-      card.className = 'card';
-
-      const imgSrc = resolveImagePath(item.image || defaultImage);
-      const title = escapeHtml(item.title || 'Bez tytułu');
-      const type = escapeHtml(item.type || '—');
-      const epText = item.episodes != null ? `${item.episodes} ep.` : '—';
-
-      card.innerHTML = `
-        <img src="${imgSrc}" alt="${title}" />
-        <h3>${title}</h3>
-        <div class="small">${type} • ${epText}</div>
-      `;
-
-      card.addEventListener('click', () => {
-        setMainFromItem(item);
-      });
-
-      carouselEl.appendChild(card);
-    });
-
-    currentIndex = 0;
-    updateCarouselView();
-  }
-
-  async function fetchFirst(list) {
-    for (const path of list) {
-      try {
-        say('Próba pobrania: ' + path);
-
-        const resp = await fetch(path, { cache: 'no-store' });
-        say('Status dla ' + path + ': ' + resp.status);
-
-        if (!resp.ok) continue;
-
-        const data = await resp.json();
-        say('JSON OK: ' + path);
-
-        return data;
-      } catch (e) {
-        say('Błąd dla ' + path + ':\n' + e);
-      }
-    }
-
-    return null;
-  }
-
-  function normalizeTitlesData(data) {
-    if (!data) return [];
-
-    if (Array.isArray(data)) return data;
-
-    if (data && Array.isArray(data.titles)) return data.titles;
-
-    return [];
-  }
-
-  prevBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const total = carouselEl ? carouselEl.children.length : 0;
-      if (!total) return;
-
-      currentIndex = Math.max(0, currentIndex - 1);
-      updateCarouselView();
-    });
-  });
-
-  nextBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const total = carouselEl ? carouselEl.children.length : 0;
-      if (!total) return;
-
-      currentIndex = Math.min(total - 1, currentIndex + 1);
-      updateCarouselView();
-    });
-  });
-
-  toggleSocialBtn?.addEventListener('click', () => {
-    if (!socialWrap) return;
+  // social domyślnie ukryte
+  socialWrap.classList.add('hidden');
+  toggleSocialBtn.addEventListener('click', () => {
     const hidden = socialWrap.classList.toggle('hidden');
     toggleSocialBtn.textContent = hidden ? 'Pokaż statystyki' : 'Ukryj statystyki';
   });
 
-  watchBtn?.addEventListener('click', () => {
-    document.querySelector('.list')?.scrollIntoView({ behavior: 'smooth' });
-  });
-
-  trailerBtn?.addEventListener('click', () => {
-    alert('Zwiastun — demo.');
-  });
-
-  searchBtn?.addEventListener('click', () => {
-    const q = searchInput?.value.trim();
-    if (!q) {
-      alert('Pole wyszukiwania jest puste');
-      return;
+  async function fetchFirst(list) {
+    for (const path of list) {
+      try {
+        const resp = await fetch(path, {cache: 'no-store'});
+        if (!resp.ok) {
+          console.warn('fetch', path, 'status', resp.status);
+          continue;
+        }
+        const data = await resp.json();
+        return data;
+      } catch (e) {
+        console.warn('fetch error', path, e.message);
+      }
     }
-    window.location.href = `/search?q=${encodeURIComponent(q)}`;
-  });
+    return null;
+  }
 
-  async function init() {
-    say('INIT START');
-
+  (async function init() {
     let titlesData = await fetchFirst(jsonCandidates);
-
     if (!titlesData) {
-      say('Nie znaleziono JSON, używam sampleList');
-      titlesData = { titles: sampleList };
+      const single = await fetchFirst(['../meta-data/data.json','/meta-data/data.json']);
+      titlesData = single ? (Array.isArray(single) ? single : [single]) : sampleList;
     }
 
-    const list = normalizeTitlesData(titlesData);
-    say('Ilość rekordów po normalizacji: ' + list.length);
+    if (titlesData && titlesData.titles && Array.isArray(titlesData.titles)) {
+      titlesData = titlesData.titles;
+    }
 
     const year = '2026';
-    let filtered = list.filter((t) => {
-      const r = t && t.release ? String(t.release) : '';
+    const filtered = (Array.isArray(titlesData) ? titlesData : []).filter(t => {
+      const r = t.release ? String(t.release) : '';
       return r.includes(year);
     });
 
-    say('Po filtrze 2026: ' + filtered.length);
-
-    if (filtered.length === 0) {
-      filtered = sampleList;
-      say('Filtr dał 0, podstawiam sampleList');
-    }
-
-    let finalList = filtered.slice(0, 10);
-
+    let finalList = filtered.slice(0,10);
     if (finalList.length < 10) {
-      const extras = sampleList.filter((s) => !finalList.find((f) => f.title === s.title));
-      finalList = finalList.concat(extras).slice(0, 10);
-      say('Uzupełniono listę do: ' + finalList.length);
+      const extras = sampleList.filter(s => !finalList.find(f => f.title === s.title));
+      finalList = finalList.concat(extras).slice(0,10);
     }
 
-    const mainData = finalList[0] || list[0] || sampleList[0];
-    if (mainData) {
-      setMainFromItem(mainData);
-      say('Ustawiono główny tytuł: ' + (mainData.title || 'brak'));
-    } else {
-      say('Brak danych do pokazania');
-    }
+    const mainData = finalList[0] || (Array.isArray(titlesData) ? titlesData[0] : null);
+    if (mainData) setMainFromItem(mainData);
 
     buildCarousel(finalList);
-    say('Karuzela zbudowana');
+  })();
+
+  // karuzela
+  let currentIndex = 0;
+  function buildCarousel(list) {
+    carouselEl.innerHTML = '';
+    list.forEach((item) => {
+      const card = document.createElement('article');
+      card.className = 'card';
+      const imgSrc = item.image ? (item.image.startsWith('/') ? item.image : ('../' + item.image.replace(/^\.?\//, ''))) : defaultImage;
+      card.innerHTML = `<img src="${imgSrc}" alt="${escapeHtml(item.title)}" />
+                        <h3>${escapeHtml(item.title)}</h3>
+                        <div class="small">${escapeHtml(item.type || '—')} • ${item.episodes != null ? item.episodes + ' ep.' : '—'}</div>`;
+      card.addEventListener('click', () => setMainFromItem(item));
+      carouselEl.appendChild(card);
+    });
+    carouselTotalEl.textContent = String(list.length);
+    currentIndex = 0;
+    updateCarouselView();
   }
 
-  init().catch((e) => {
-    say('Błąd init:\n' + e);
+  function updateCarouselView() {
+    const cards = carouselEl.children;
+    const total = cards.length;
+    if (total === 0) {
+      carouselIndexEl.textContent = '0';
+      carouselTotalEl.textContent = '0';
+      return;
+    }
+    const cardRect = cards[0].getBoundingClientRect();
+    const gap = 12;
+    const cardWidth = Math.round(cardRect.width + gap);
+    carouselEl.scrollTo({ left: currentIndex * cardWidth, behavior: 'smooth' });
+    carouselIndexEl.textContent = String(currentIndex + 1);
+    carouselTotalEl.textContent = String(total);
+  }
+
+  prevBtn.addEventListener('click', () => {
+    const total = carouselEl.children.length;
+    if (total === 0) return;
+    currentIndex = (currentIndex - 1 + total) % total;
+    updateCarouselView();
+  });
+  nextBtn.addEventListener('click', () => {
+    const total = carouselEl.children.length;
+    if (total === 0) return;
+    currentIndex = (currentIndex + 1) % total;
+    updateCarouselView();
+  });
+
+  function setMainFromItem(item) {
+    titleEl.textContent = item.title || titleEl.textContent;
+    descEl.textContent = item.description || descEl.textContent;
+    ratingEl.textContent = item.rating || ratingEl.textContent;
+    releaseEl.textContent = item.release || releaseEl.textContent;
+    qualityEl.textContent = item.quality || qualityEl.textContent;
+    episodesInfo.textContent = 'Odcinki: ' + (item.episodes != null ? item.episodes : '—');
+    typeInfo.textContent = 'Typ: ' + (item.type || (item.version || '—'));
+    genresInfo.textContent = 'Gatunki: ' + (Array.isArray(item.tags) ? item.tags.join(', ') : (item.genres || '—'));
+    if (item.image) {
+      const img = item.image.startsWith('/') ? item.image : ('../' + item.image.replace(/^\.?\//, ''));
+      heroImg.src = img;
+    }
+    if (item.social) {
+      document.getElementById('likes').textContent = item.social.likes || document.getElementById('likes').textContent;
+      document.getElementById('views').textContent = item.social.views || document.getElementById('views').textContent;
+      document.getElementById('comments').textContent = item.social.comments || document.getElementById('comments').textContent;
+    }
+  }
+
+  function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); });
+  }
+
+  document.getElementById('watchBtn')?.addEventListener('click', () => {
+    document.querySelector('.list')?.scrollIntoView({ behavior: 'smooth' });
+  });
+  document.getElementById('trailerBtn')?.addEventListener('click', () => {
+    alert('Zwiastun — demo.');
+  });
+  document.getElementById('searchBtn')?.addEventListener('click', () => {
+    const q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+    window.location.href = `/search?q=${encodeURIComponent(q)}`;
   });
 });

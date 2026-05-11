@@ -71,3 +71,23 @@ body{
   .hero-media img{max-height:320px;object-fit:cover}
   .search input{min-width:120px}
 }
+
+/* --- UI: episodes / type / genres --- */
+.meta-top{display:flex;gap:12px;align-items:center;margin:8px 0 12px}
+.episodes,.ep-type,.genres{background:rgba(255,255,255,0.02);padding:6px 10px;border-radius:8px;color:var(--muted);font-size:0.95rem}
+
+/* --- social controls --- */
+.social-controls{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.hidden{display:none}
+.social{display:flex;gap:8px}
+
+/* --- carousel layout --- */
+.carousel-wrap{display:flex;align-items:center;gap:12px;position:relative;margin-top:12px}
+.carousel{display:grid;grid-auto-flow:column;grid-auto-columns:160px;gap:12px;overflow:hidden;padding:6px}
+.card{min-width:160px;max-width:160px;background:var(--card);padding:10px;border-radius:10px;text-align:center}
+.carousel-arrow{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+.carousel-counter{position:absolute;right:8px;bottom:-28px;color:var(--muted);font-size:0.95rem}
+@media (max-width:880px){
+  .carousel{grid-auto-columns:140px}
+  .carousel-counter{right:16px}
+}

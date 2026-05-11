@@ -1,14 +1,17 @@
-// --- KARUZELA, STEROWANIE STRZAŁKAMI I AUTO-ADVANCE ---
+// --- KARUZELA, STEROWANIE STRZAŁKAMI I AUTO-ADVANCE (poprawiona wersja) ---
 let currentIndex = 0;
 let autoAdvanceTimer = null;
 let resumeTimer = null;
 const AUTO_INTERVAL_MS = 10000; // 10 sekund
 const RESUME_AFTER_MS = 15000; // wznowienie po 15s bezczynności
 
+// buildCarousel: tworzy karty i zapisuje dane globalnie
 function buildCarousel(list) {
   if (!carouselEl) return;
+  // zapisz dane, żeby getItemAtIndex mogło zwracać pełne obiekty
+  window.__carouselData = Array.isArray(list) ? list.slice() : [];
   carouselEl.innerHTML = '';
-  list.forEach((item, idx) => {
+  window.__carouselData.forEach((item, idx) => {
     const card = document.createElement('article');
     card.className = 'card';
     const imgSrc = item.image ? (item.image.startsWith('/') ? item.image : ('../' + item.image.replace(/^\.?\//, ''))) : defaultImage;
@@ -16,21 +19,21 @@ function buildCarousel(list) {
                       <h3>${escapeHtml(item.title)}</h3>
                       <div class="small">${escapeHtml(item.type || '—')} • ${item.episodes != null ? item.episodes + ' ep.' : '—'}</div>`;
     card.addEventListener('click', () => {
-      // kliknięcie karty ustawia główny panel i zatrzymuje auto-advance tymczasowo
+      // ustaw główny panel i zatrzymaj auto-advance tymczasowo
       setMainFromItem(item);
       stopAutoAdvanceTemporarily();
-      // ustaw currentIndex na klikniętej karcie
       currentIndex = idx;
       updateCarouselView();
     });
     carouselEl.appendChild(card);
   });
-  if (carouselTotalEl) carouselTotalEl.textContent = String(list.length);
+  if (carouselTotalEl) carouselTotalEl.textContent = String(window.__carouselData.length);
   currentIndex = 0;
   updateCarouselView();
-  startAutoAdvance(); // uruchom auto-advance po zbudowaniu karuzeli
+  startAutoAdvance();
 }
 
+// updateCarouselView: przewija karuzelę i aktualizuje licznik
 function updateCarouselView() {
   if (!carouselEl || !carouselIndexEl || !carouselTotalEl) return;
   const cards = carouselEl.children;
@@ -42,7 +45,7 @@ function updateCarouselView() {
   }
   // oblicz szerokość karty (uwzględnia gap)
   const cardRect = cards[0].getBoundingClientRect();
-  const gap = 12; // dopasuj jeśli inny w CSS
+  const gap = 12; // dopasuj jeśli w CSS masz inną wartość
   const cardWidth = Math.round(cardRect.width + gap);
   // upewnij się, że currentIndex jest w zakresie
   if (currentIndex < 0) currentIndex = 0;
@@ -52,19 +55,24 @@ function updateCarouselView() {
   carouselTotalEl.textContent = String(total);
 }
 
-// Obsługa przycisków overlay (strzałki na obrazie)
+// getItemAtIndex: zwraca obiekt tytułu z zapisanych danych
+function getItemAtIndex(idx) {
+  if (!window.__carouselData || !Array.isArray(window.__carouselData)) return null;
+  return window.__carouselData[idx] || null;
+}
+
+// przyciski overlay (strzałki) — teraz ustawiają główny panel
 if (prevBtn) prevBtn.addEventListener('click', () => {
-  const total = carouselEl?.children.length || 0;
+  const total = (window.__carouselData || []).length;
   if (total === 0) return;
   currentIndex = (currentIndex - 1 + total) % total;
-  // ustaw główny panel na nowy element
   const item = getItemAtIndex(currentIndex);
   if (item) setMainFromItem(item);
   updateCarouselView();
   stopAutoAdvanceTemporarily();
 });
 if (nextBtn) nextBtn.addEventListener('click', () => {
-  const total = carouselEl?.children.length || 0;
+  const total = (window.__carouselData || []).length;
   if (total === 0) return;
   currentIndex = (currentIndex + 1) % total;
   const item = getItemAtIndex(currentIndex);
@@ -73,24 +81,11 @@ if (nextBtn) nextBtn.addEventListener('click', () => {
   stopAutoAdvanceTemporarily();
 });
 
-// Pomocnicza funkcja: zwraca obiekt tytułu z karuzeli wg indexu
-function getItemAtIndex(idx) {
-  const card = carouselEl?.children[idx];
-  if (!card) return null;
-  // zakładamy, że lista finalList jest dostępna jako window.__carouselData (ustawiamy to w init)
-  if (window.__carouselData && Array.isArray(window.__carouselData)) {
-    return window.__carouselData[idx] || null;
-  }
-  // fallback: spróbuj odczytać z DOM (tylko tytuł)
-  const title = card.querySelector('h3')?.textContent || null;
-  return title ? { title } : null;
-}
-
 // AUTO-ADVANCE: start / stop / resume
 function startAutoAdvance() {
-  stopAutoAdvance(); // upewnij się, że nie ma duplikatów
+  stopAutoAdvance();
   autoAdvanceTimer = setInterval(() => {
-    const total = carouselEl?.children.length || 0;
+    const total = (window.__carouselData || []).length;
     if (total === 0) return;
     currentIndex = (currentIndex + 1) % total;
     const item = getItemAtIndex(currentIndex);
@@ -111,14 +106,9 @@ function stopAutoAdvance() {
 }
 
 function stopAutoAdvanceTemporarily() {
-  // zatrzymaj teraz i wznow po RESUME_AFTER_MS
   stopAutoAdvance();
   resumeTimer = setTimeout(() => {
     startAutoAdvance();
     resumeTimer = null;
   }, RESUME_AFTER_MS);
 }
-
-// Upewnij się, że init zapisuje dane karuzeli globalnie, żeby getItemAtIndex działało
-// W miejscu, gdzie tworzysz finalList w init(), dodaj:
-// window.__carouselData = finalList;

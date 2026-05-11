@@ -1,4 +1,4 @@
-// script.js - wersja debug z alertami (usuń alerty po naprawie)
+// script.js - debug z logami do konsoli (bez alertów)
 document.addEventListener('DOMContentLoaded', () => {
   // DOM
   const titleEl = document.getElementById('title');
@@ -47,78 +47,79 @@ document.addEventListener('DOMContentLoaded', () => {
       if (imgPath.startsWith('/')) return location.origin + imgPath;
       return new URL(imgPath, location.href).href;
     } catch (e) {
+      console.warn('normalizeImageUrl error, returning defaultImage', e);
       return defaultImage;
     }
   }
 
   // fallback obraz
   heroImg.onerror = () => {
-    console.log('heroImg.onerror: obraz nie załadowany, ustawiam placeholder');
+    console.info('heroImg.onerror: obraz nie załadowany, ustawiam placeholder');
     heroImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340"><rect width="100%" height="100%" fill="#0b1220"/><text x="50%" y="50%" fill="#9aa6b2" font-size="20" text-anchor="middle" dominant-baseline="middle">Brak obrazu</text></svg>'
     );
   };
   heroImg.src = normalizeImageUrl(defaultImage);
-  console.log('Ustawiono heroImg.src na: ' + heroImg.src);
+  console.info('Ustawiono heroImg.src na:', heroImg.src);
 
   // social toggle
   if (socialWrap) socialWrap.classList.add('hidden');
   if (toggleSocialBtn) toggleSocialBtn.addEventListener('click', () => {
-    if (!socialWrap) { console.log('toggleSocial: brak socialWrap'); return; }
+    if (!socialWrap) { console.warn('toggleSocial: brak socialWrap'); return; }
     const hidden = socialWrap.classList.toggle('hidden');
     toggleSocialBtn.textContent = hidden ? 'Pokaż statystyki' : 'Ukryj statystyki';
-    console.log('toggleSocial clicked, hidden=' + hidden);
+    console.info('toggleSocial clicked, hidden=', hidden);
   });
 
-  // fetch helper z alertami
+  // fetch helper z logami
   async function fetchFirst(list) {
     for (const path of list) {
       try {
-        console.log('fetchFirst: próbuję ' + path);
+        console.info('fetchFirst: próbuję', path);
         const resp = await fetch(path, { cache: 'no-store' });
-        console.log('fetchFirst: status ' + path + ' → ' + resp.status);
+        console.info('fetchFirst: status', path, '→', resp.status);
         const text = await resp.text();
-        console.log('fetchFirst: odpowiedź (pierwsze 300 znaków):\n' + (text ? text.slice(0,300) : '[pusta]'));
+        console.debug('fetchFirst: odpowiedź (pierwsze 300 znaków):', text ? text.slice(0,300) : '[pusta]');
         if (!resp.ok) {
-          console.log('fetchFirst: HTTP nie OK dla ' + path + ' (' + resp.status + ')');
+          console.warn('fetchFirst: HTTP nie OK dla', path, '(', resp.status, ')');
           continue;
         }
         try {
           const data = JSON.parse(text);
-          console.log('fetchFirst: JSON sparsowany z ' + path);
+          console.info('fetchFirst: JSON sparsowany z', path);
           return { data, path };
         } catch (parseErr) {
-          console.log('fetchFirst: błąd parsowania JSON z ' + path + ' → ' + parseErr.message);
+          console.error('fetchFirst: błąd parsowania JSON z', path, parseErr.message);
           continue;
         }
       } catch (e) {
-        console.log('fetchFirst: błąd sieci przy ' + path + ' → ' + e.message);
+        console.error('fetchFirst: błąd sieci przy', path, e.message);
       }
     }
-    console.log('fetchFirst: nie znaleziono poprawnego JSON w listach');
+    console.warn('fetchFirst: nie znaleziono poprawnego JSON w listach');
     return null;
   }
 
   // INIT
   (async function init() {
-    console.log('init: start');
+    console.info('init: start');
     let titlesDataObj = await fetchFirst(jsonCandidates);
     let titlesData = titlesDataObj ? titlesDataObj.data : null;
     if (!titlesData) {
-      console.log('init: nie znaleziono głównego JSON, próbuję alternatyw');
+      console.info('init: nie znaleziono głównego JSON, próbuję alternatyw');
       const single = await fetchFirst(['meta-data/data.json','/meta-data/data.json']);
       titlesData = single ? single.data : null;
     }
     if (!titlesData) {
-      console.log('init: używam sampleList fallback');
+      console.info('init: używam sampleList fallback');
       titlesData = sampleList;
     } else {
-      console.log('init: załadowano dane z ' + (titlesDataObj ? titlesDataObj.path : 'unknown'));
+      console.info('init: załadowano dane z', (titlesDataObj ? titlesDataObj.path : 'unknown'));
     }
 
     if (titlesData && titlesData.titles && Array.isArray(titlesData.titles)) {
       titlesData = titlesData.titles;
-      console.log('init: rozpakowano pole titles, długość: ' + titlesData.length);
+      console.info('init: rozpakowano pole titles, długość:', titlesData.length);
     }
 
     const year = '2026';
@@ -126,27 +127,27 @@ document.addEventListener('DOMContentLoaded', () => {
       const r = t.release ? String(t.release) : '';
       return r.includes(year);
     });
-    console.log('init: po filtrze roku 2026 znaleziono: ' + filtered.length);
+    console.info('init: po filtrze roku 2026 znaleziono:', filtered.length);
 
     let finalList = filtered.slice(0,10);
     if (finalList.length < 10) {
       const extras = sampleList.filter(s => !finalList.find(f => f.title === s.title));
       finalList = finalList.concat(extras).slice(0,10);
-      console.log('init: dopełniono finalList do 10 elementów, finalList.length=' + finalList.length);
+      console.info('init: dopełniono finalList do 10 elementów, finalList.length=', finalList.length);
     }
 
     window.__carouselData = finalList;
-    console.log('init: zapisano window.__carouselData, długość=' + (window.__carouselData || []).length);
+    console.info('init: zapisano window.__carouselData, długość=', (window.__carouselData || []).length);
 
     if (finalList.length > 0) {
       setMainFromItem(finalList[0]);
-      console.log('init: ustawiono pierwszy element jako main');
+      console.info('init: ustawiono pierwszy element jako main');
     } else {
-      alert('init: finalList jest pusty');
+      console.warn('init: finalList jest pusty');
     }
 
     buildCarousel(finalList);
-    console.log('init: buildCarousel wywołane');
+    console.info('init: buildCarousel wywołane');
   })();
 
   // KARUZELA + STEROWANIE + AUTO-ADVANCE
@@ -155,8 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let resumeTimer = null;
 
   function buildCarousel(list) {
-    console.log('buildCarousel: start, list.length=' + (list ? list.length : 0));
-    if (!carouselEl) { console.log('buildCarousel: brak elementu #carousel'); return; }
+    console.info('buildCarousel: start, list.length=', (list ? list.length : 0));
+    if (!carouselEl) { console.error('buildCarousel: brak elementu #carousel'); return; }
     window.__carouselData = Array.isArray(list) ? list.slice() : [];
     carouselEl.innerHTML = '';
     window.__carouselData.forEach((item, idx) => {
@@ -167,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3>${escapeHtml(item.title)}</h3>
                         <div class="small">${escapeHtml(item.type || '—')} • ${item.episodes != null ? item.episodes + ' ep.' : '—'}</div>`;
       card.addEventListener('click', () => {
-        console.log('card click: idx=' + idx + ' title=' + item.title);
+        console.info('card click: idx=', idx, 'title=', item.title);
         setMainFromItem(item);
         stopAutoAdvanceTemporarily();
         currentIndex = idx;
@@ -179,17 +180,17 @@ document.addEventListener('DOMContentLoaded', () => {
     currentIndex = 0;
     updateCarouselView();
     startAutoAdvance();
-    console.log('buildCarousel: zakończono, currentIndex=' + currentIndex);
+    console.info('buildCarousel: zakończono, currentIndex=', currentIndex);
   }
 
   function updateCarouselView() {
-    if (!carouselEl || !carouselIndexEl || !carouselTotalEl) { console.log('updateCarouselView: brak wymaganych elementów DOM'); return; }
+    if (!carouselEl || !carouselIndexEl || !carouselTotalEl) { console.warn('updateCarouselView: brak wymaganych elementów DOM'); return; }
     const cards = carouselEl.children;
     const total = cards.length;
     if (total === 0) {
       carouselIndexEl.textContent = '0';
       carouselTotalEl.textContent = '0';
-      console.log('updateCarouselView: brak kart w karuzeli');
+      console.info('updateCarouselView: brak kart w karuzeli');
       return;
     }
     const cardRect = cards[0].getBoundingClientRect();
@@ -200,37 +201,37 @@ document.addEventListener('DOMContentLoaded', () => {
     carouselEl.scrollTo({ left: currentIndex * cardWidth, behavior: 'smooth' });
     carouselIndexEl.textContent = String(currentIndex + 1);
     carouselTotalEl.textContent = String(total);
-    console.log('updateCarouselView: przewinięto do index=' + currentIndex + ' (cardWidth=' + cardWidth + ')');
+    console.debug('updateCarouselView: przewinięto do index=', currentIndex, '(cardWidth=', cardWidth, ')');
   }
 
   function getItemAtIndex(idx) {
-    if (!window.__carouselData || !Array.isArray(window.__carouselData)) { console.log('getItemAtIndex: brak window.__carouselData'); return null; }
+    if (!window.__carouselData || !Array.isArray(window.__carouselData)) { console.warn('getItemAtIndex: brak window.__carouselData'); return null; }
     const item = window.__carouselData[idx] || null;
-   console.log('getItemAtIndex: idx=' + idx + ' -> ' + (item ? item.title : 'null'));
+    console.debug('getItemAtIndex: idx=', idx, '->', item ? item.title : 'null');
     return item;
   }
 
   if (prevBtn) prevBtn.addEventListener('click', () => {
-    console.log('prevBtn clicked');
+    console.info('prevBtn clicked');
     const total = (window.__carouselData || []).length;
-    if (total === 0) { console.log('prevBtn: brak elementów'); return; }
+    if (total === 0) { console.warn('prevBtn: brak elementów'); return; }
     currentIndex = (currentIndex - 1 + total) % total;
     const item = getItemAtIndex(currentIndex);
     if (item) {
-      console.log('prevBtn: ustawiam main na ' + item.title);
+      console.info('prevBtn: ustawiam main na', item.title);
       setMainFromItem(item);
     }
     updateCarouselView();
     stopAutoAdvanceTemporarily();
   });
   if (nextBtn) nextBtn.addEventListener('click', () => {
-    alert('nextBtn clicked');
+    console.info('nextBtn clicked');
     const total = (window.__carouselData || []).length;
-    if (total === 0) { alert('nextBtn: brak elementów'); return; }
+    if (total === 0) { console.warn('nextBtn: brak elementów'); return; }
     currentIndex = (currentIndex + 1) % total;
     const item = getItemAtIndex(currentIndex);
     if (item) {
-      alert('nextBtn: ustawiam main na ' + item.title);
+      console.info('nextBtn: ustawiam main na', item.title);
       setMainFromItem(item);
     }
     updateCarouselView();
@@ -238,15 +239,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function startAutoAdvance() {
-    alert('startAutoAdvance: uruchamiam auto-advance co ' + AUTO_INTERVAL_MS + 'ms');
+    console.info('startAutoAdvance: uruchamiam auto-advance co', AUTO_INTERVAL_MS, 'ms');
     stopAutoAdvance();
     autoAdvanceTimer = setInterval(() => {
       const total = (window.__carouselData || []).length;
-      if (total === 0) { alert('autoAdvance: brak elementów'); return; }
+      if (total === 0) { console.warn('autoAdvance: brak elementów'); return; }
       currentIndex = (currentIndex + 1) % total;
       const item = getItemAtIndex(currentIndex);
       if (item) {
-        alert('autoAdvance: ustawiam main na ' + item.title + ' (index=' + currentIndex + ')');
+        console.info('autoAdvance: ustawiam main na', item.title, '(index=', currentIndex, ')');
         setMainFromItem(item);
       }
       updateCarouselView();
@@ -257,20 +258,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (autoAdvanceTimer) {
       clearInterval(autoAdvanceTimer);
       autoAdvanceTimer = null;
-      alert('stopAutoAdvance: timer wyczyszczony');
+      console.info('stopAutoAdvance: timer wyczyszczony');
     }
     if (resumeTimer) {
       clearTimeout(resumeTimer);
       resumeTimer = null;
-      alert('stopAutoAdvance: resumeTimer wyczyszczony');
+      console.info('stopAutoAdvance: resumeTimer wyczyszczony');
     }
   }
 
   function stopAutoAdvanceTemporarily() {
-    alert('stopAutoAdvanceTemporarily: zatrzymuję auto-advance tymczasowo');
+    console.info('stopAutoAdvanceTemporarily: zatrzymuję auto-advance tymczasowo');
     stopAutoAdvance();
     resumeTimer = setTimeout(() => {
-      alert('stopAutoAdvanceTemporarily: wznawiam auto-advance po ' + RESUME_AFTER_MS + 'ms');
+      console.info('stopAutoAdvanceTemporarily: wznawiam auto-advance po', RESUME_AFTER_MS, 'ms');
       startAutoAdvance();
       resumeTimer = null;
     }, RESUME_AFTER_MS);
@@ -278,8 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ustawianie głównego panelu
   function setMainFromItem(item) {
-    if (!item) { alert('setMainFromItem: otrzymano null'); return; }
-    alert('setMainFromItem: ustawiam dane dla ' + (item.title || '[brak tytułu]'));
+    if (!item) { console.warn('setMainFromItem: otrzymano null'); return; }
+    console.info('setMainFromItem: ustawiam dane dla', (item.title || '[brak tytułu]'));
     if (titleEl) titleEl.textContent = item.title || titleEl.textContent;
     if (descEl) descEl.textContent = item.description || descEl.textContent;
     if (ratingEl) ratingEl.textContent = item.rating || ratingEl.textContent;
@@ -290,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (genresInfo) genresInfo.textContent = 'Gatunki: ' + (Array.isArray(item.tags) ? item.tags.join(', ') : (item.genres || '—'));
     if (item.image && heroImg) {
       const url = normalizeImageUrl(item.image);
-      alert('setMainFromItem: ustawiam heroImg.src = ' + url);
+      console.info('setMainFromItem: ustawiam heroImg.src =', url);
       heroImg.src = url;
     }
     if (item.social) {
@@ -313,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.list')?.scrollIntoView({ behavior: 'smooth' });
   });
   document.getElementById('trailerBtn')?.addEventListener('click', () => {
+    console.info('trailerBtn clicked (demo)');
     alert('Zwiastun — demo.');
   });
   document.getElementById('searchBtn')?.addEventListener('click', () => {

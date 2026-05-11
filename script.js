@@ -228,3 +228,21 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = `/search?q=${encodeURIComponent(q)}`;
   });
 });
+
+
+      (async () => {
+  console.log('DOM ready:', document.readyState);
+  const ids = ['title','description','heroImage','episodesInfo','typeInfo','genresInfo','carousel','prevBtn','nextBtn','toggleSocial','socialWrap'];
+  ids.forEach(id => console.log(id, !!document.getElementById(id)));
+  const paths = ['../meta-data/data.json','../meta-data/titles/data.json','/meta-data/data.json'];
+  for (const p of paths) {
+    try {
+      const r = await fetch(p, {cache:'no-store'});
+      console.log('FETCH', p, 'status', r.status);
+      const txt = await r.text();
+      console.log('RESP first 300 chars for', p, ':', txt.slice(0,300));
+    } catch(e) {
+      console.log('FETCH ERROR', p, e.message);
+    }
+  }
+})();
